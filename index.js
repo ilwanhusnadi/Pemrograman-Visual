@@ -7,7 +7,6 @@ let todayWindow;
 let createWindow;
 let listWindow;
 let aboutWindow;
-
 let allAppointment = [];
 
 app.on("ready", () => {
@@ -22,7 +21,7 @@ app.on("ready", () => {
 
         app.quit();
         todayWindow = null;
-    })
+    });
 
     const mainMenu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(mainMenu);
@@ -64,7 +63,7 @@ const aboutWindowCreator = () => {
         },
         width: 600,
         height: 400,
-        title: "About"
+        title: "All Appointments"
     });
     aboutWindow.setMenu(null);
     aboutWindow.loadURL(`file://${__dirname}/about.html`);
@@ -82,7 +81,7 @@ ipcMain.on("appointment:create", (event, appointment) => {
 });
 
 ipcMain.on("appointment:request:list", event => {
-    console.log("here");
+    listWindow.webContents.send('appointment:response:list', allAppointment);
 });
 
 ipcMain.on("appointment:request:today", event => {
@@ -108,6 +107,7 @@ const menuTemplate = [{
         },
         {
             label: "Quit",
+            accelerator: process.platform === "dawrwin" ? "Command+Q" : "Ctrl + Q",
             click() {
                 app.quit();
             }
