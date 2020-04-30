@@ -1,5 +1,6 @@
 const electron = require("electron");
 const uuid = require("uuid").v4;
+const fd = require("fs");
 
 const {app, BrowserWindow, Menu, ipcMain} = electron;
 
@@ -9,15 +10,26 @@ let listWindow;
 let aboutWindow;
 let allAppointment = [];
 
+fs.readFile("db.json", (err, jsonAppointment) => {
+    if(!err) {
+        const oldAppointment = JSON.parse(jsonAppointment);
+        allAppointment = oldAppointment;
+    }
+
+});
+
 app.on("ready", () => {
     todayWindow = new BrowserWindow({
         webPreferences: {
             nodeIntegration: true
         },
-        title: "Aplikasi pertama"
+        title: "Aplikasi dokter"
     });
     todayWindow.loadURL(`file://${__dirname}/today.html`);
     todayWindow.on("closed", () => {
+
+        const jsonAppointment = JSON.stringify(allAppointment);
+        fs.writeFileSync("db.json", jsonAppointment);
 
         app.quit();
         todayWindow = null;
@@ -93,13 +105,13 @@ ipcMain.on("appointment:done", (event,id) => {
     console.log("here3");
 });
 
-ipcMain.on('appointment:done', (event, id)) => {
+ipcMain.on('appointment:done', (event, id) => {
     allAppointment.forEach((appointment) => {
         appointment.done = 1
     })
 
     SendTodayAppointments()
-}
+})
 
 const SendTodayAppointments = () => {
     const today = new Date().toISOString().slice(0, 10);
